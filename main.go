@@ -1,10 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/Breadumi/aggreGator/internal/config"
+	"github.com/Breadumi/aggreGator/internal/database"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -15,8 +18,16 @@ func main() {
 		return
 	}
 
+	db, err := sql.Open("postgres", cfg.DbURL)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	dbQueries := database.New(db)
+
 	s := state{
-		cfg: &cfg,
+		db:  dbQueries,
+		cfg: cfg,
 	}
 
 	cmds := commands{
@@ -24,6 +35,9 @@ func main() {
 	}
 
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
+	cmds.register("reset", handlerReset)
+	cmds.register("users", handlerUsers)
 	cmd := command{}
 
 	if len(os.Args) < 2 {
@@ -44,5 +58,7 @@ func main() {
 		os.Exit(1)
 		return
 	}
+
+	os.Exit(0)
 
 }

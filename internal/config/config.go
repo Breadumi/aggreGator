@@ -15,23 +15,23 @@ type Config struct {
 	CurrentUserName string `json:"current_user_name"`
 }
 
-func Read() (Config, error) {
+func Read() (*Config, error) {
 
 	filePath, err := getFilePath()
 	if err != nil {
-		return Config{}, err
+		return &Config{}, err
 	}
 
 	file, err := os.Open(filePath)
 	if err != nil {
-		return Config{}, fmt.Errorf("error reading json config file")
+		return &Config{}, fmt.Errorf("error reading json config file")
 	}
 	defer file.Close()
 
-	var cfg Config
+	var cfg *Config
 	err = json.NewDecoder(file).Decode(&cfg)
 	if err != nil {
-		return Config{}, fmt.Errorf("error decoding json config file")
+		return &Config{}, fmt.Errorf("error decoding json config file")
 	}
 
 	return cfg, nil
