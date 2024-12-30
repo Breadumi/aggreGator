@@ -222,17 +222,12 @@ func handlerFollow(s *state, cmd command) error {
 		FeedID:    feed.ID,
 	}
 
-	rows, err := s.db.CreateFeedFollow(context.Background(), params)
+	row, err := s.db.CreateFeedFollow(context.Background(), params)
 	if err != nil {
 		return err
 	}
-	for i, row := range rows {
-		rowJSON, err := json.MarshalIndent(row, "", "  ")
-		if err != nil {
-			return err
-		}
-		fmt.Printf("Row %v: %s\n", i, rowJSON)
-	}
+
+	fmt.Printf("User %s is now following %s\n", row.UserName, row.FeedName)
 
 	return nil
 }
