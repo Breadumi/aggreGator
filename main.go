@@ -8,6 +8,7 @@ import (
 	"github.com/Breadumi/aggreGator/internal/config"
 	"github.com/Breadumi/aggreGator/internal/database"
 	_ "github.com/lib/pq"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
@@ -19,6 +20,11 @@ func main() {
 	}
 
 	db, err := sql.Open("postgres", cfg.DbURL)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = goose.Up(db, "sql/schema")
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -38,6 +44,11 @@ func main() {
 	cmds.register("register", handlerRegister)
 	cmds.register("reset", handlerReset)
 	cmds.register("users", handlerUsers)
+	cmds.register("agg", handlerAgg)
+	cmds.register("addfeed", handlerAddFeed)
+	cmds.register("feeds", handlerFeeds)
+	cmds.register("follow", handlerFollow)
+	cmds.register("following", handlerFollowing)
 	cmd := command{}
 
 	if len(os.Args) < 2 {
