@@ -90,9 +90,34 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 		return err
 	}
 
+	if len(userFeedFollows) == 0 {
+		fmt.Printf("%s is not following any feeds", user.Name)
+		return nil
+	}
+
 	for _, row := range userFeedFollows {
 		fmt.Printf("%s\n", row.FeedName)
 	}
+
+	return nil
+}
+
+func handlerUnfollow(s *state, cmd command, user database.User) error {
+
+	if len(cmd.args) != 1 {
+		return errors.New("expected 1 argument <url>")
+	}
+
+	params := database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		Url:    cmd.args[0],
+	}
+
+	if err := s.db.DeleteFeedFollow(context.Background(), params); err != nil {
+		return err
+	}
+
+	fmt.Printf("User %s unfollowed %s\n", user.Name, cmd.args[0])
 
 	return nil
 }
