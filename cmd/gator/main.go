@@ -68,7 +68,7 @@ func main() {
 	cmds.register("users", handlerUsers,
 		"gator users\n\tList all registered users.")
 	cmds.register("agg", handlerAgg,
-		"gator agg\n\tContinuously save new posts from the current user's followed feeds.")
+		"gator agg [time]\n\tContinuously save new posts from the current user's followed feeds every unit of [time]. [time] is formatted <number><unit>, e.g. 5m is 5 minutes")
 	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed),
 		"gator addfeed [url]\n\tAdd a new feed at [url] and sets current user to follow [url].")
 	cmds.register("feeds", handlerFeeds,

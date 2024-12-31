@@ -1,7 +1,7 @@
 aggreGator.exe
 bin/
 # Go binary files
-gator
+/gator
 *.exe
 *.exe~
 *.dll
