@@ -17,6 +17,6 @@ A JSON config file `.gatorconfig` must be placed in your system root folder (fou
   "db_url": "<connection string>"
 }
 ```
-The connection string will have the form `postgres://[username]:[password]@localhost:5432/[database_name]`. The database must be created manually using Postgres.
+The connection string will have the form `postgres://[username]:[password]@localhost:5432/[database_name]?sslmode=disable`. The database must be created manually using Postgres.
 
 Use `gator help` for a full list of commands.
