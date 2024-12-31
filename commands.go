@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/Breadumi/aggreGator/internal/database"
@@ -17,11 +19,13 @@ type command struct {
 }
 
 type commands struct {
-	commandMap map[string]func(*state, command) error
+	commandMap     map[string]func(*state, command) error
+	commandDescMap map[string]string
 }
 
-func (cmds *commands) register(name string, f func(*state, command) error) {
+func (cmds *commands) register(name string, f func(*state, command) error, desc string) {
 	cmds.commandMap[name] = f
+	cmds.commandDescMap[name] = desc
 }
 
 func (cmds *commands) run(s *state, cmd command) error {
@@ -154,6 +158,8 @@ func handlerAgg(s *state, cmd command) error {
 		return err
 	}
 	ticker := time.NewTicker(t)
+	fmt.Println("Press ctrl+C to cancel scraping")
+	fmt.Println("Scraping...")
 	for ; ; <-ticker.C {
 		scrapeFeeds(s)
 	}
@@ -181,7 +187,31 @@ func scrapeFeeds(s *state) error {
 	}
 
 	for _, item := range rss.Channel.Item {
-		fmt.Printf("%s\n", item.Title)
+
+		parsedTime, err := time.Parse(time.RFC1123, item.PubDate)
+		if err != nil {
+			parsedTime, err = time.Parse(time.RFC1123Z, item.PubDate)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+		}
+
+		postParams := database.CreatePostParams{
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+			Title:       item.Title,
+			Url:         item.Link,
+			Description: item.Description,
+			PublishedAt: parsedTime,
+			FeedID:      nextFeed.ID,
+		}
+		post, err := s.db.CreatePost(context.Background(), postParams)
+		if err != nil && err != sql.ErrNoRows {
+			return err
+		}
+		fmt.Printf("Saved post %s from %s for user %s\n", post.Title, nextFeed.Name, s.cfg.CurrentUserName)
+
 	}
 
 	return nil

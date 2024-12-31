@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/Breadumi/aggreGator/internal/database"
@@ -120,4 +121,33 @@ func handlerUnfollow(s *state, cmd command, user database.User) error {
 	fmt.Printf("User %s unfollowed %s\n", user.Name, cmd.args[0])
 
 	return nil
+}
+
+func handlerBrowse(s *state, cmd command, user database.User) error {
+
+	if len(cmd.args) > 1 {
+		return errors.New("expected no more than 1 argument <post limit> (default limit = 2)")
+	}
+
+	var limit int
+	var err error
+
+	if len(cmd.args) == 1 {
+		limit, err = strconv.Atoi(cmd.args[0])
+		if err != nil {
+			return errors.New("invalid limit argument: expected type <int>")
+		}
+	} else {
+		limit = 2
+	}
+
+	paramsPostsByUser := database.GetPostsByUserParams{
+		UserID: user.ID,
+		Limit:  int32(limit),
+	}
+
+	s.db.GetPostsByUser(context.Background(), paramsPostsByUser)
+
+	return nil
+
 }
